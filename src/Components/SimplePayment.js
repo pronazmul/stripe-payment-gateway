@@ -22,9 +22,6 @@ const SimplePayment = () => {
                     },
                 }}
             />
-            <button className='btn btn-warning rounded mt-5' type="submit">
-                Pay
-            </button>
         </Elements>
     )
 }

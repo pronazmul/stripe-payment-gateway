@@ -1,62 +1,45 @@
 import React from 'react';
-import { CardElement, useStripe, useElements, Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripePromise = loadStripe('pk_test_JJ1eMdKN0Hp4UFJ6kWXWO4ix00jtXzq5XG');
+import {CardElement, useStripe, useElements} from '@stripe/react-stripe-js';
 
 const AdvancePayment = () => {
+  const stripe = useStripe();
+  const elements = useElements();
 
-    const stripe = useStripe();
-    const elements = useElements();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+    if (!stripe || !elements) {
+      // Stripe.js has not loaded yet. Make sure to disable
+      // form submission until Stripe.js has loaded.
+      return;
+    }
 
-        if (!stripe || !elements) {
-            return;
-        }
-        const cardElement = elements.getElement(CardElement);
+    // Get a reference to a mounted CardElement. Elements knows how
+    // to find your CardElement because there can only ever be one of
+    // each type of element.
+    const cardElement = elements.getElement(CardElement);
 
-        // Use your card Element with other Stripe.js APIs
-        const { error, paymentMethod } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: cardElement,
-        });
+    // Use your card Element with other Stripe.js APIs
+    const {error, paymentMethod} = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+    });
 
-        if (error) {
-            console.log('[error]', error);
-        } else {
-            console.log('[PaymentMethod]', paymentMethod);
-        }
-    };
+    if (error) {
+      console.log('[error]', error);
+    } else {
+      console.log('[PaymentMethod]', paymentMethod);
+    }
+  };
 
-    return (
-
-        <Elements stripe={stripePromise}>
-            <form onSubmit={handleSubmit}>
-                <CardElement
-                    options={{
-                        style: {
-                            base: {
-                                fontSize: '16px',
-                                color: '#424770',
-                                '::placeholder': {
-                                    color: '#aab7c4',
-                                },
-                            },
-                            invalid: {
-                                color: '#9e2146',
-                            },
-                        },
-                    }}
-                />
-                <button className='btn btn-warning rounded' type="submit">
-                    Pay
-              </button>
-            </form>
-        </Elements>
-
-    );
+  return (
+    <form onSubmit={handleSubmit}>
+      <CardElement />
+      <button className='btn btn-success mt-3' type="submit" disabled={!stripe}>
+        Pay Now
+      </button>
+    </form>
+  );
 };
 
 export default AdvancePayment;
