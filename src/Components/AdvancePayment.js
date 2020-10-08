@@ -1,22 +1,21 @@
 import React from 'react';
 import {CardElement, useStripe, useElements} from '@stripe/react-stripe-js';
+import { useState } from 'react';
 
 const AdvancePayment = () => {
   const stripe = useStripe();
   const elements = useElements();
 
+  const [paymentError, setPaymentError] = useState(false)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
-      // Stripe.js has not loaded yet. Make sure to disable
-      // form submission until Stripe.js has loaded.
+     
       return;
     }
-
-    // Get a reference to a mounted CardElement. Elements knows how
-    // to find your CardElement because there can only ever be one of
-    // each type of element.
     const cardElement = elements.getElement(CardElement);
 
     // Use your card Element with other Stripe.js APIs
@@ -26,19 +25,25 @@ const AdvancePayment = () => {
     });
 
     if (error) {
-      console.log('[error]', error);
+        setPaymentError(error.message)
+        setPaymentSuccess(false)        
     } else {
-      console.log('[PaymentMethod]', paymentMethod);
+      setPaymentSuccess(true)
+      setPaymentError(false)
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <CardElement />
-      <button className='btn btn-success mt-3' type="submit" disabled={!stripe}>
-        Pay Now
-      </button>
-    </form>
+      <>
+            <form onSubmit={handleSubmit}>
+            <CardElement />
+            <button className='btn btn-success mt-3' type="submit" disabled={!stripe}>
+                Pay Now
+            </button>
+            </form>
+            {paymentError&& <p className='alert alert-danger mt-2'>{paymentError}</p>}
+            {paymentSuccess&& <p className='alert alert-success mt-2'>Your Payment is Successfull</p>}
+    </>
   );
 };
 
